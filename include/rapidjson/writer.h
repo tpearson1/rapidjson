@@ -16,7 +16,6 @@
 #define RAPIDJSON_WRITER_H_
 
 #include "stream.h"
-#include "internal/meta.h"
 #include "internal/stack.h"
 #include "internal/strfunc.h"
 #include "internal/dtoa.h"
@@ -224,9 +223,8 @@ public:
 
     bool EndObject(SizeType memberCount = 0) {
         (void)memberCount;
-        RAPIDJSON_ASSERT(level_stack_.GetSize() >= sizeof(Level)); // not inside an Object
-        RAPIDJSON_ASSERT(!level_stack_.template Top<Level>()->inArray); // currently inside an Array, not Object
-        RAPIDJSON_ASSERT(0 == level_stack_.template Top<Level>()->valueCount % 2); // Object has a Key without a Value
+        RAPIDJSON_ASSERT(level_stack_.GetSize() >= sizeof(Level));
+        RAPIDJSON_ASSERT(!level_stack_.template Top<Level>()->inArray);
         level_stack_.template Pop<Level>(1);
         return EndValue(WriteEndObject());
     }
@@ -252,7 +250,7 @@ public:
     //! Simpler but slower overload.
     bool String(const Ch* const& str) { return String(str, internal::StrLen(str)); }
     bool Key(const Ch* const& str) { return Key(str, internal::StrLen(str)); }
-    
+
     //@}
 
     //! Write a raw JSON value.
@@ -309,7 +307,7 @@ protected:
         const char* end = internal::i32toa(i, buffer);
         PutReserve(*os_, static_cast<size_t>(end - buffer));
         for (const char* p = buffer; p != end; ++p)
-            PutUnsafe(*os_, static_cast<typename OutputStream::Ch>(*p));
+            PutUnsafe(*os_, static_cast<typename TargetEncoding::Ch>(*p));
         return true;
     }
 
@@ -318,7 +316,7 @@ protected:
         const char* end = internal::u32toa(u, buffer);
         PutReserve(*os_, static_cast<size_t>(end - buffer));
         for (const char* p = buffer; p != end; ++p)
-            PutUnsafe(*os_, static_cast<typename OutputStream::Ch>(*p));
+            PutUnsafe(*os_, static_cast<typename TargetEncoding::Ch>(*p));
         return true;
     }
 
@@ -327,7 +325,7 @@ protected:
         const char* end = internal::i64toa(i64, buffer);
         PutReserve(*os_, static_cast<size_t>(end - buffer));
         for (const char* p = buffer; p != end; ++p)
-            PutUnsafe(*os_, static_cast<typename OutputStream::Ch>(*p));
+            PutUnsafe(*os_, static_cast<typename TargetEncoding::Ch>(*p));
         return true;
     }
 
@@ -336,7 +334,7 @@ protected:
         char* end = internal::u64toa(u64, buffer);
         PutReserve(*os_, static_cast<size_t>(end - buffer));
         for (char* p = buffer; p != end; ++p)
-            PutUnsafe(*os_, static_cast<typename OutputStream::Ch>(*p));
+            PutUnsafe(*os_, static_cast<typename TargetEncoding::Ch>(*p));
         return true;
     }
 
@@ -364,12 +362,12 @@ protected:
         char* end = internal::dtoa(d, buffer, maxDecimalPlaces_);
         PutReserve(*os_, static_cast<size_t>(end - buffer));
         for (char* p = buffer; p != end; ++p)
-            PutUnsafe(*os_, static_cast<typename OutputStream::Ch>(*p));
+            PutUnsafe(*os_, static_cast<typename TargetEncoding::Ch>(*p));
         return true;
     }
 
     bool WriteString(const Ch* str, SizeType length)  {
-        static const typename OutputStream::Ch hexDigits[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+        static const typename TargetEncoding::Ch hexDigits[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
         static const char escape[256] = {
 #define Z16 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
             //0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F
@@ -425,7 +423,7 @@ protected:
             else if ((sizeof(Ch) == 1 || static_cast<unsigned>(c) < 256) && RAPIDJSON_UNLIKELY(escape[static_cast<unsigned char>(c)]))  {
                 is.Take();
                 PutUnsafe(*os_, '\\');
-                PutUnsafe(*os_, static_cast<typename OutputStream::Ch>(escape[static_cast<unsigned char>(c)]));
+                PutUnsafe(*os_, static_cast<typename TargetEncoding::Ch>(escape[static_cast<unsigned char>(c)]));
                 if (escape[static_cast<unsigned char>(c)] == 'u') {
                     PutUnsafe(*os_, '0');
                     PutUnsafe(*os_, '0');
