@@ -1,6 +1,6 @@
 {
   "author": "Milo Yip",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "playable": false,
   "uses-c++": true,
   "header-only": true
