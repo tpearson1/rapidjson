@@ -47,7 +47,7 @@ enum PrettyFormatOptions {
 template<typename OutputStream, typename SourceEncoding = UTF8<>, typename TargetEncoding = UTF8<>, typename StackAllocator = CrtAllocator, unsigned writeFlags = kWriteDefaultFlags>
 class PrettyWriter : public Writer<OutputStream, SourceEncoding, TargetEncoding, StackAllocator, writeFlags> {
 public:
-    typedef Writer<OutputStream, SourceEncoding, TargetEncoding, StackAllocator> Base;
+    typedef Writer<OutputStream, SourceEncoding, TargetEncoding, StackAllocator, writeFlags> Base;
     typedef typename Base::Ch Ch;
 
     //! Constructor
@@ -148,7 +148,7 @@ public:
         (void)ret;
         RAPIDJSON_ASSERT(ret == true);
         if (Base::level_stack_.Empty()) // end of json text
-            Base::os_->Flush();
+            Base::Flush();
         return true;
     }
 
@@ -172,7 +172,7 @@ public:
         (void)ret;
         RAPIDJSON_ASSERT(ret == true);
         if (Base::level_stack_.Empty()) // end of json text
-            Base::os_->Flush();
+            Base::Flush();
         return true;
     }
 
